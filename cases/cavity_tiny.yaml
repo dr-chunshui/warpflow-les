@@ -1,0 +1,57 @@
+# lid-driven cavity, single sub-domain (serial GPU); mirrors Benchmark_CavityFlow
+case: cavity_serial
+
+domain:
+  lx: 1.0
+  ly: 1.0
+  lz: 1.0
+
+grid:
+  nx: 80
+  ny: 80
+  nz: 80
+
+physics:
+  reynolds: 400
+  sgs:
+    enabled: true
+    model: wale
+    cw: 0.46
+
+initial:
+  type: rest
+  noise: 1.0e-6
+
+boundaries:
+  west: wall
+  east: wall
+  south: slip
+  north: slip
+  bottom: wall
+  top: moving_lid
+  lid_velocity: 1.0
+
+numerics:
+  time_scheme: rk2
+  convection: cds4
+  diffusion: explicit4
+  pressure_solver: multigrid
+  mg_levels: 3
+  max_outer_iters: 30
+  div_tolerance: 1.0e-6
+  ghost_layers: 3
+
+time:
+  n_steps: 50000
+  variable_dt: true
+  dt_init: 3.0e-4
+  safety_factor: 0.8
+  dt_growth: 1.1
+
+output:
+  n_out: 1500
+  log_interval: 20
+  outdir: output_tiny
+
+mpi:
+  domains: [1, 1, 1]

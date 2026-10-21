@@ -1,0 +1,13 @@
+[project]
+name = "warpflow-les"
+version = "0.1.0"
+description = "GPU-accelerated MPI-parallel LES solver (Python + NVIDIA Warp), a port of the Hydro3D numerical core"
+requires-python = ">=3.10"
+dependencies = ["warp-lang>=1.18", "mpi4py>=4.0", "numpy", "pyyaml"]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["warpflow*"]

@@ -1,0 +1,57 @@
+# warpflow-les case: lid-driven cavity (mirrors Hydro3D Benchmark_CavityFlow)
+case: cavity
+
+domain:
+  lx: 1.0
+  ly: 1.0
+  lz: 1.0
+
+grid:                     # global cell counts (must be divisible by mpi domains)
+  nx: 80
+  ny: 80
+  nz: 80
+
+physics:
+  reynolds: 400           # nu = 1/Re
+  sgs:
+    enabled: true
+    model: wale           # smagorinsky | wale
+    cw: 0.46              # WALE coefficient (Hydro3D default)
+
+initial:
+  type: rest
+  noise: 0.01             # white-noise amplitude on velocity
+
+boundaries:
+  west: wall              # wall | slip | moving_lid | periodic
+  east: wall
+  south: slip
+  north: slip
+  bottom: wall
+  top: moving_lid
+  lid_velocity: 1.0
+
+numerics:
+  time_scheme: rk2        # rk2 (Hydro3D conv_sch=3)
+  convection: cds4        # cds2 | cds4 | weno
+  diffusion: explicit4    # explicit2 | explicit4
+  pressure_solver: multigrid
+  mg_levels: 3            # coarsest = n / 2^(levels-1)
+  max_outer_iters: 30    # Poisson outer iterations (Hydro3D maxcy)
+  div_tolerance: 1.0e-6   # rmax threshold (Hydro3D eps)
+  ghost_layers: 3         # NPL (Hydro3D pl = pl_ex+1)
+
+time:
+  n_steps: 50000
+  variable_dt: true
+  dt_init: 3.0e-4
+  safety_factor: 0.8
+  dt_growth: 1.1
+
+output:
+  n_out: 1500             # snapshot interval (steps)
+  log_interval: 20
+  outdir: output
+
+mpi:
+  domains: [2, 2, 2]      # sub-domain decomposition (ranks); use [1,1,1] for serial GPU
