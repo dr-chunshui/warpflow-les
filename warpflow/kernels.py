@@ -69,17 +69,21 @@ def conv4th_u(u: wp.array3d(dtype=wp.float64), v: wp.array3d(dtype=wp.float64),
     du2dx = (-sp2 + F(27.0) * sp1 - F(27.0) * sn + sm1) / (F(24.0) * dx)
 
     # duv/dy
-    sp1 = _iy(u, i, j + 1, k) * _ix(v, i + 1, j + 1, k)
-    sn = _iy(u, i, j, k) * _ix(v, i + 1, j, k)
-    sm1 = _iy(u, i, j - 1, k) * _ix(v, i + 1, j - 1, k)
-    sm2 = _iy(u, i, j - 2, k) * _ix(v, i + 1, j - 2, k)
+    # H's face interpolation in the cross direction is I(j+1): faces at
+    # j+1.5, j+0.5, j-0.5, j-1.5 so the 4-point derivative lands on the
+    # cell centre j (Fortran J(jj) = (-f(jj+2)+9f(jj+1)+9f(jj)-f(jj-1))/16);
+    # the v factor keeps H's jj indices (j+1, j, j-1, j-2)
+    sp1 = _iy(u, i, j + 2, k) * _ix(v, i + 1, j + 1, k)
+    sn = _iy(u, i, j + 1, k) * _ix(v, i + 1, j, k)
+    sm1 = _iy(u, i, j, k) * _ix(v, i + 1, j - 1, k)
+    sm2 = _iy(u, i, j - 1, k) * _ix(v, i + 1, j - 2, k)
     duvdy = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dy)
 
     # duw/dz
-    sp1 = _iz(u, i, j, k + 1) * _ix(w, i + 1, j, k + 1)
-    sn = _iz(u, i, j, k) * _ix(w, i + 1, j, k)
-    sm1 = _iz(u, i, j, k - 1) * _ix(w, i + 1, j, k - 1)
-    sm2 = _iz(u, i, j, k - 2) * _ix(w, i + 1, j, k - 2)
+    sp1 = _iz(u, i, j, k + 2) * _ix(w, i + 1, j, k + 1)
+    sn = _iz(u, i, j, k + 1) * _ix(w, i + 1, j, k)
+    sm1 = _iz(u, i, j, k) * _ix(w, i + 1, j, k - 1)
+    sm2 = _iz(u, i, j, k - 1) * _ix(w, i + 1, j, k - 2)
     duwdz = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dz)
 
     ustar[i, j, k] = uoo[i, j, k] - dt * alpha * (du2dx + duvdy + duwdz)
@@ -104,17 +108,22 @@ def conv4th_v(u: wp.array3d(dtype=wp.float64), v: wp.array3d(dtype=wp.float64),
     dv2dy = (-sp2 + F(27.0) * sp1 - F(27.0) * sn + sm1) / (F(24.0) * dy)
 
     # duv/dx
-    sp1 = _ix(v, i + 1, j, k) * _iy(u, i + 1, j + 1, k)
-    sn = _ix(v, i, j, k) * _iy(u, i, j + 1, k)
-    sm1 = _ix(v, i - 1, j, k) * _iy(u, i - 1, j + 1, k)
-    sm2 = _ix(v, i - 2, j, k) * _iy(u, i - 2, j + 1, k)
+    # H's v-factor x-interp is I(i+1) (Fortran ii-loop: v at ii+2..ii-1 with
+    # ii = i+1, i, i-1, i-2); the u-factor keeps H's ii indices with its
+    # y-interp fixed at j+1
+    sp1 = _ix(v, i + 2, j, k) * _iy(u, i + 1, j + 1, k)
+    sn = _ix(v, i + 1, j, k) * _iy(u, i, j + 1, k)
+    sm1 = _ix(v, i, j, k) * _iy(u, i - 1, j + 1, k)
+    sm2 = _ix(v, i - 1, j, k) * _iy(u, i - 2, j + 1, k)
     duvdx = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dx)
 
     # dvw/dz
-    sp1 = _iz(v, i, j, k + 1) * _iy(w, i, j + 1, k + 1)
-    sn = _iz(v, i, j, k) * _iy(w, i, j + 1, k)
-    sm1 = _iz(v, i, j, k - 1) * _iy(w, i, j, k - 1)
-    sm2 = _iz(v, i, j, k - 2) * _iy(w, i, j + 1, k - 2)
+    # H's v-factor z-interp is I(k+1); the w-factor keeps H's kk indices
+    # (k+1, k, k-1, k-2) with its y-interp fixed at j+1
+    sp1 = _iz(v, i, j, k + 2) * _iy(w, i, j + 1, k + 1)
+    sn = _iz(v, i, j, k + 1) * _iy(w, i, j + 1, k)
+    sm1 = _iz(v, i, j, k) * _iy(w, i, j + 1, k - 1)
+    sm2 = _iz(v, i, j, k - 1) * _iy(w, i, j + 1, k - 2)
     dvwdz = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dz)
 
     vstar[i, j, k] = voo[i, j, k] - dt * alpha * (duvdx + dv2dy + dvwdz)
@@ -139,17 +148,21 @@ def conv4th_w(u: wp.array3d(dtype=wp.float64), v: wp.array3d(dtype=wp.float64),
     dw2dz = (-sp2 + F(27.0) * sp1 - F(27.0) * sn + sm1) / (F(24.0) * dz)
 
     # duw/dx
-    sp1 = _ix(w, i + 1, j, k) * _iz(u, i + 1, j, k + 1)
-    sn = _ix(w, i, j, k) * _iz(u, i, j, k + 1)
-    sm1 = _ix(w, i - 1, j, k) * _iz(u, i - 1, j, k + 1)
-    sm2 = _ix(w, i - 2, j, k) * _iz(u, i - 2, j, k + 1)
+    # H's w-factor x-interp is I(i+1); the u-factor keeps H's ii indices
+    # (i+1, i, i-1, i-2) with its z-interp fixed at k+1
+    sp1 = _ix(w, i + 2, j, k) * _iz(u, i + 1, j, k + 1)
+    sn = _ix(w, i + 1, j, k) * _iz(u, i, j, k + 1)
+    sm1 = _ix(w, i, j, k) * _iz(u, i - 1, j, k + 1)
+    sm2 = _ix(w, i - 1, j, k) * _iz(u, i - 2, j, k + 1)
     duwdx = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dx)
 
     # dvw/dy
-    sp1 = _iy(w, i, j + 1, k) * _iz(v, i, j + 1, k + 1)
-    sn = _iy(w, i, j, k) * _iz(v, i, j, k + 1)
-    sm1 = _iy(w, i, j - 1, k) * _iz(v, i, j - 1, k + 1)
-    sm2 = _iy(w, i, j - 2, k) * _iz(v, i, j - 2, k + 1)
+    # H's w-factor y-interp is I(j+1); the v-factor keeps H's jj indices
+    # (j+1, j, j-1, j-2) with its z-interp fixed at k+1
+    sp1 = _iy(w, i, j + 2, k) * _iz(v, i, j + 1, k + 1)
+    sn = _iy(w, i, j + 1, k) * _iz(v, i, j, k + 1)
+    sm1 = _iy(w, i, j, k) * _iz(v, i, j - 1, k + 1)
+    sm2 = _iy(w, i, j - 1, k) * _iz(v, i, j - 2, k + 1)
     dvwdy = (-sp1 + F(27.0) * sn - F(27.0) * sm1 + sm2) / (F(24.0) * dy)
 
     wstar[i, j, k] = woo[i, j, k] - dt * alpha * (duwdx + dvwdy + dw2dz)
