@@ -202,8 +202,10 @@ class BoundaryKernels:
         # west (bc_west=4): u(is-1-ly) = 0, j,k in [js-1, je+1]x[ks-1, ke+1]
         self._launch_const(fld, 0, False, NPL - 1, 0.0,
                            NPL - 1, n + 2, NPL - 1, n + 2, 3)
-        # east (bc_east=4): u(ie+1+ly) = 0, same perpendicular ranges
-        self._launch_const(fld, 0, True, NPL + n, 0.0,
+        # east (bc_east=4): u(ie+1+ly) = 0, same perpendicular ranges;
+        # ieu is reduced by 1 (non-periodic east), so the wall face itself
+        # is full NPL+n-1 and the launch must start there (not NPL+n)
+        self._launch_const(fld, 0, True, NPL + n - 1, 0.0,
                            NPL - 1, n + 2, NPL - 1, n + 2, 3)
         # south (bc_south=3): u(i, js-1-ly) = +u(i, js+ly),
         # i in [is-1, ie], k in [ks-1, ke+1]
