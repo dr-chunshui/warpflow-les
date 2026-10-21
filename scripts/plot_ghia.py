@@ -25,6 +25,7 @@ GRID = "#e7e5e1"
 
 N = 80
 DX = 1.0 / N
+CTIME = 15.0  # overridden from the snapshot metadata when available
 
 
 def read_ghia(path):
@@ -71,6 +72,10 @@ def main():
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
+    global CTIME
+    with np.load(args.snapshot) as z0:
+        if "ctime" in z0:
+            CTIME = float(z0["ctime"])
     zc, u_prof, xc, w_prof = centreline_profiles(args.snapshot)
     gx_u, gu = read_ghia(os.path.join(args.ghia_dir, "Ghia_U.dat"))
     gx_w, gw = read_ghia(os.path.join(args.ghia_dir, "Ghia_W.dat"))
@@ -121,8 +126,8 @@ def main():
     ax1.legend(loc="lower right", frameon=False, fontsize=9,
                labelcolor=INK)
 
-    fig.suptitle("Lid-driven cavity, 80$^3$, Re = 400, t = 15.0",
-                 color=INK, fontsize=13)
+    fig.suptitle("Lid-driven cavity, 80$^3$, Re = 400, t = %.1f"
+                 % CTIME, color=INK, fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     path = os.path.join(args.out, "ghia_comparison.png")
     fig.savefig(path, facecolor=SURFACE)

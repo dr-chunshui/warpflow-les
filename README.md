@@ -93,8 +93,13 @@ Snapshots land in `outdir` as `snap_%06d_r%03d.npz` (full 3-D arrays with
 ## Verification: lid-driven cavity vs Ghia et al.
 
 `cases/cavity_serial.yaml` reproduces Hydro3D's `Benchmark_CavityFlow`
-exactly: 80^3 grid, Re = 400, fixed dt = 3e-4, 50 000 steps (t = 15),
-rest + 1 % noise initial condition, WALE SGS on.
+exactly: 80^3 grid, Re = 400, 50 000 steps, rest + 1 % noise initial
+condition, WALE SGS on.  The time step follows `checkdt.for` semantics:
+`variable_dt: true` (Hydro3D `variTS = .false.`) means dt grows by 10 %
+per step but is capped at `safety_factor * dtmax` (CFL 0.8), starting
+from `dt_init = 3e-4` -- the value on Hydro3D's control line.  A truly
+frozen dt (`variTS = .true.`) blew up at t ~ 1.8 when the growing lid
+vortex passed CFL 1, which is how the semantics were discovered.
 
 Against the native Fortran code, driven from an identical restart field,
 per-field differences stay at ~1e-4 rms (velocity scale 1) over the

@@ -43,7 +43,7 @@ numerics:
 
 time:
   n_steps: 50000
-  variable_dt: false
+  variable_dt: true
   dt_init: 3.0e-4
   safety_factor: 0.8
   dt_growth: 1.1
