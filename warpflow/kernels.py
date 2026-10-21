@@ -292,22 +292,25 @@ def wale_viscosity(u: wp.array3d(dtype=wp.float64), v: wp.array3d(dtype=wp.float
     k += npl
 
     # velocity gradient g[a][b] = d c_a / d x_b at cell centre
+    # (eddyv_wale: the diagonal rates are face differences; the cross
+    # rates average the component onto the cell centre in its OWN face
+    # direction and centre-difference along the derivative direction)
     dudx = (u[i, j, k] - u[i - 1, j, k]) / dx
-    dudy = (F(0.5) * (u[i, j + 1, k] + u[i, j + 1, k + 1])
-            - F(0.5) * (u[i, j, k] + u[i, j, k + 1])) / dy
-    dudz = (F(0.5) * (u[i, j, k + 1] + u[i, j + 1, k + 1])
-            - F(0.5) * (u[i, j, k] + u[i, j + 1, k])) / dz
+    dudy = (F(0.25) * (u[i, j + 1, k] + u[i - 1, j + 1, k]
+                       - u[i, j - 1, k] - u[i - 1, j - 1, k])) / dy
+    dudz = (F(0.25) * (u[i, j, k + 1] + u[i - 1, j, k + 1]
+                       - u[i, j, k - 1] - u[i - 1, j, k - 1])) / dz
 
-    dvdx = (F(0.5) * (v[i + 1, j, k] + v[i + 1, j, k + 1])
-            - F(0.5) * (v[i, j, k] + v[i, j, k + 1])) / dx
+    dvdx = (F(0.25) * (v[i + 1, j, k] + v[i + 1, j - 1, k]
+                       - v[i - 1, j, k] - v[i - 1, j - 1, k])) / dx
     dvdy = (v[i, j, k] - v[i, j - 1, k]) / dy
-    dvdz = (F(0.5) * (v[i, j, k + 1] + v[i + 1, j, k + 1])
-            - F(0.5) * (v[i, j, k] + v[i + 1, j, k])) / dz
+    dvdz = (F(0.25) * (v[i, j, k + 1] + v[i, j - 1, k + 1]
+                       - v[i, j, k - 1] - v[i, j - 1, k - 1])) / dz
 
-    dwdx = (F(0.5) * (w[i + 1, j, k] + w[i + 1, j + 1, k])
-            - F(0.5) * (w[i, j, k] + w[i, j + 1, k])) / dx
-    dwdy = (F(0.5) * (w[i, j + 1, k] + w[i + 1, j + 1, k])
-            - F(0.5) * (w[i, j, k] + w[i + 1, j, k])) / dy
+    dwdx = (F(0.25) * (w[i + 1, j, k] + w[i + 1, j, k - 1]
+                       - w[i - 1, j, k] - w[i - 1, j, k - 1])) / dx
+    dwdy = (F(0.25) * (w[i, j + 1, k] + w[i, j + 1, k - 1]
+                       - w[i, j - 1, k] - w[i, j - 1, k - 1])) / dy
     dwdz = (w[i, j, k] - w[i, j, k - 1]) / dz
 
     # g2_ab = g_ak g_kb  (traceless-symmetric part of gg^T)
@@ -344,8 +347,9 @@ def wale_viscosity(u: wp.array3d(dtype=wp.float64), v: wp.array3d(dtype=wp.float
     delta = wp.pow(dx * dy * dz, F(1.0) / F(3.0))
     ls = cw * delta
     sdsd15 = wp.pow(sdsd, F(1.5))
-    denom = wp.pow(wp.abs(ss), F(2.5)) + wp.pow(sdsd, F(1.25)) + F(1.0e-20)
-    nut = ls * ls * sdsd15 / denom
+    denom = wp.pow(wp.abs(ss), F(2.5)) + wp.pow(sdsd, F(1.25))
+    # eddyv_wale: the eddy viscosity is only switched on for sdsd > 1e-8
+    nut = wp.where(sdsd > F(1.0e-8), ls * ls * sdsd15 / denom, F(0.0))
 
     vis[i, j, k] = rrey + nut
 
