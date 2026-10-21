@@ -128,10 +128,10 @@ def read_tecbin(path, n, raw=False):
                     fh.read(4)
         if raw:
             return {name: arr[..., col].copy()
-                    for name, col in (("u", 8), ("v", 11), ("w", 14), ("p", 3))}
+                    for name, col in (("u", 8), ("v", 11), ("w", 14), ("p", 3), ("vis", 6))}
         s = (slice(pl, pl + n),) * 3
         return {name: arr[s[0], s[1], s[2], col].copy()
-                for name, col in (("u", 8), ("v", 11), ("w", 14), ("p", 3))}
+                for name, col in (("u", 8), ("v", 11), ("w", 14), ("p", 3), ("vis", 6))}
 
 
 def compare(h3ddir, snapdir, n=80, step=25, upto=100):

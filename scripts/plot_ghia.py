@@ -64,7 +64,7 @@ def style_axis(ax):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snapshot", default="output_cavity/snap_0050000_r000.npz")
+    ap.add_argument("--snapshot", default="output_cavity/snap_050000_r000.npz")
     ap.add_argument("--ghia-dir",
                     default="/home/chunshui/Workspace/hydro3D/"
                             "hydro3D-7_Hydro3D-STABLE/Benchmark_CavityFlow")

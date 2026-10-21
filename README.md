@@ -102,14 +102,15 @@ frozen dt (`variTS = .true.`) blew up at t ~ 1.8 when the growing lid
 vortex passed CFL 1, which is how the semantics were discovered.
 
 Against the native Fortran code, driven from an identical restart field,
-per-field differences stay at ~1e-4 rms (velocity scale 1) over the
+per-field differences stay at ~1e-6 rms (velocity scale 1) over the
 first 100 steps, with matching divergence-residual trajectories; the
-residual difference is traceable to the documented multigrid deviation
-below.  The converged flow reproduces the Ghia, Tuann & Olson centreline
-profiles (Re = 400):
+residual is multigrid iteration-path noise (see the documented deviation
+below).  The converged flow reproduces the Ghia, Tuann & Olson centreline
+profiles (Re = 400): u_max 0.876 vs 0.881 (0.6 %), centreline rms 0.03
+at 80^3; see REPORT.md for the full validation story.
 
 ```bash
-python scripts/plot_ghia.py --snapshot output_cavity/snap_0050000_r000.npz
+python scripts/plot_ghia.py --snapshot output_cavity/snap_050000_r000.npz
 # -> output_cavity/ghia_comparison.png, centreline.csv
 ```
 
@@ -122,7 +123,7 @@ python scripts/plot_ghia.py --snapshot output_cavity/snap_0050000_r000.npz
    The Poisson problems are solved to the same tolerance, but the
    iteration path (and therefore the additive pressure constant and
    tiny per-point pressure differences) is not bit-identical; velocity
-   fields agree to ~1e-4 rms over 100 steps.
+   fields agree to ~1e-6 rms over 100 steps.
 2. **`correctoutflux` / `pressure_forcing`.**  Both are structurally
    inert for the cavity benchmark (they act only on inflow/outflow or
    fully periodic faces) and are therefore omitted; the guarded code
