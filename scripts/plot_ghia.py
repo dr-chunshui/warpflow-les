@@ -36,17 +36,17 @@ def read_ghia(path):
 def centreline_profiles(npz_path):
     """u(z) on the vertical centreline, w(x) on the horizontal one.
 
-    Staggered-grid geometry (full-array indexing, NPL offset included in
-    the +2): cell centres sit at (c+0.5)*dx (full index c+2), u x-faces at
-    f*dx (full index f+2), w z-faces likewise.  x = 0.5 is exactly u face
-    f = 40; y = z = 0.5 lie between cell centres 39 and 40 -- take 40.
+    Staggered-grid geometry, full-array indexing (86^3, NPL=3): a face
+    f sits at f*dx (full index f+2), a cell centre c at (c+0.5)*dx
+    (full index c+3).  x = 0.5 is exactly u face 40 (full 42) and w
+    z-face 40 (full 42); the centreline cell centre c = 40 is full 43.
     """
     z = np.load(npz_path)
     u = z["u"]
     w = z["w"]
     zc = (np.arange(N) + 0.5) * DX            # cell-centre coordinates
-    u_prof = u[42, 42, 2:2 + N]                # x face 40, y centre 40
-    w_prof = w[2:2 + N, 42, 42]                # z face 40, y centre 40
+    u_prof = u[42, 43, 3:3 + N]                # x face 40, y centre 40
+    w_prof = w[3:3 + N, 43, 42]                # z face 40, y centre 40
     return zc, u_prof, zc, w_prof
 
 
