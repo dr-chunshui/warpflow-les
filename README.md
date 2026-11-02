@@ -13,9 +13,11 @@ sub-domains, mirroring Hydro3D's domain-decomposition layout.
 ## Focus: bubble plume — the physics this port targets
 
 <p align="center">
-  <video src="assets/bubble_plume.mp4" controls loop muted
-         poster="assets/bubble_poster.png" width="620"></video>
+  <img src="assets/bubble_plume.gif" width="620" alt="LPT bubble plume animation">
 </p>
+<p align="center"><sub>
+  animated GIF — <a href="assets/bubble_plume.mp4">download the full-quality MP4</a>
+</sub></p>
 
 A Lagrangian-particle-tracking bubble plume (2.4 mm bubbles released at
 1 000 /s into a 0.64 m tank, 10 s of physical time), simulated with the
