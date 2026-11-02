@@ -10,6 +10,20 @@ device memory and every kernel is a Warp kernel launched on the GPU;
 between nodes the classic MPI halo exchange (mpi4py) couples the
 sub-domains, mirroring Hydro3D's domain-decomposition layout.
 
+## Focus: bubble plume — the physics this port targets
+
+<p align="center">
+  <video src="assets/bubble_plume.mp4" controls loop muted
+         poster="assets/bubble_poster.png" width="620"></video>
+</p>
+
+A Lagrangian-particle-tracking bubble plume (2.4 mm bubbles released at
+1 000 /s into a 0.64 m tank, 10 s of physical time), simulated with the
+**native Fortran Hydro3D v7.0** — the reference implementation that
+warpflow-les ports to GPUs.  The Eulerian liquid field, the Lagrangian
+bubble field and their two-way PSI-cell coupling shown here are exactly
+the physics this project must ultimately reproduce on Warp kernels.
+
 ## Numerics (mirroring Hydro3D v7.0)
 
 | Piece | Method | Hydro3D source |
